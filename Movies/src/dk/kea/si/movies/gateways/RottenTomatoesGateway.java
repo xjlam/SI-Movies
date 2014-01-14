@@ -1,13 +1,14 @@
 package dk.kea.si.movies.gateways;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Scanner;
+import java.net.URLConnection;
+import java.util.zip.GZIPInputStream;
+
+import org.apache.http.util.ByteArrayBuffer;
 
 import com.google.gson.Gson;
 
@@ -139,14 +140,23 @@ public class RottenTomatoesGateway {
 
 	private static String readUrlContents(String url) throws IOException,
 			MalformedURLException {
-		InputStream inputStream = new URL(url).openStream();
-		Charset charset = Charset.forName("ISO-8859-1");
-		InputStreamReader input = new InputStreamReader(inputStream, charset);
-		Scanner scanner = new Scanner(new BufferedReader(input));
-		String content = "";
-		while (scanner.hasNextLine()) {
-			content += scanner.nextLine();
+		URL u = new URL(url);
+		URLConnection urlConnection = u.openConnection();
+		String contentEncoding = urlConnection.getContentEncoding();
+		InputStream inputStream;
+		if (contentEncoding != null && contentEncoding.contains("gzip")) {
+			inputStream = new GZIPInputStream(urlConnection.getInputStream());
+		} else {
+			inputStream = urlConnection.getInputStream();
 		}
-		return content;
+		BufferedInputStream bis = new BufferedInputStream(inputStream);
+		ByteArrayBuffer baf = new ByteArrayBuffer(1024);
+		byte[] buffer = new byte[1024];
+		int sizeRead = bis.read(buffer);
+		while (sizeRead > -1) {
+			baf.append(buffer, 0, sizeRead);
+			sizeRead = bis.read(buffer);
+		}
+		return new String(baf.toByteArray());
 	}
 }

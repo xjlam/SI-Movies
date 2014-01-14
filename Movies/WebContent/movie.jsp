@@ -78,7 +78,7 @@
 					<div>
 						<h3><%=googleVideos.get(i).getTitle()%></h3>
 						<iframe width="640" height="390"
-							src="http://www.youtube.com/embed/<%= googleVideos.get(i).getId() %>?autoplay=0"
+							src="//www.youtube.com/embed/<%= googleVideos.get(i).getId() %>?autoplay=0"
 							frameborder="1" allowfullscreen></iframe>
 					</div>
 					<% } %>
@@ -101,6 +101,7 @@
 							<li>
 								<h3><%= commentsHelper.getAuthorDisplayName(i) %></h3>
 								<%= commentsHelper.getCommentText(i) %>
+								<a href="#">Reply</a>
 								<% if(user != null && (user.getRole() == Role.ADMIN || user.getRole() == Role.EDITOR)) { %>
 									<p>
 										<form name="delete_comment">
